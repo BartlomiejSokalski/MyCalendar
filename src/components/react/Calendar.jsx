@@ -22,7 +22,7 @@ import {
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 
-const currentDate = '2024-09-05'; // aktualna data
+const currentDate = new Date();
 
 export default function Calendar() {
     const [data, setData] = React.useState([]);
