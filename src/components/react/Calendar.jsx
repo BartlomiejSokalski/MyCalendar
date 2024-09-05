@@ -1,12 +1,10 @@
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
 import { db } from '../firebase/firebase';
-import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
-import { EditingState } from '@devexpress/dx-react-scheduler';
-import { IntegratedEditing } from '@devexpress/dx-react-scheduler';
+import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc, Timestamp } from "firebase/firestore";
+import { EditingState, ViewState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-
 import {
     Scheduler,
     DayView,
@@ -18,87 +16,97 @@ import {
     ViewSwitcher,
     AppointmentForm,
     AppointmentTooltip,
-
 } from '@devexpress/dx-react-scheduler-material-ui';
-import { ViewState } from '@devexpress/dx-react-scheduler';
+import { Alert } from '@mui/material';
 
-const currentDate = new Date();
+const getCurrentDate = () => new Date().toISOString().split('T')[0];
 
 export default function Calendar() {
     const [data, setData] = React.useState([]);
+    const [error, setError] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                console.log("Pobieranie wydarzeń z Firestore...");
-                const querySnapshot = await getDocs(collection(db, "events"));
-                const events = querySnapshot.docs.map(doc => {
-                    const eventData = doc.data();
-                    return {
-                        id: doc.id,
-                        ...eventData,
-                        startDate: eventData.startDate.toDate(),  // Timestamp do Date
-                        endDate: eventData.endDate.toDate(),
-                    };
-                });
-                console.log("Wydarzenia pobrane z Firestore:", events);
-                setData(events);
-            } catch (e) {
-                console.error("Błąd podczas pobierania wydarzeń:", e);
-            }
-        };
-        fetchEvents().catch(error => console.error("Błąd w fetchEvents:", error));
+    const fetchEvents = React.useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            console.log("Fetching events from Firestore...");
+            const querySnapshot = await getDocs(collection(db, "events"));
+            const events = querySnapshot.docs.map(doc => {
+                const eventData = doc.data();
+                return {
+                    id: doc.id,
+                    ...eventData,
+                    startDate: eventData.startDate instanceof Timestamp ? eventData.startDate.toDate() : new Date(eventData.startDate),
+                    endDate: eventData.endDate instanceof Timestamp ? eventData.endDate.toDate() : new Date(eventData.endDate),
+                };
+            });
+            console.log("Events fetched from Firestore:", events);
+            setData(events);
+        } catch (e) {
+            console.error("Error fetching events:", e);
+            setError("Failed to load events. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
+    React.useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
+
     const commitChanges = async ({ added, changed, deleted }) => {
-        let updatedData = data;
+        try {
+            let updatedData = [...data];
 
-        if (added) {
-            try {
-                console.log("Dodawanie:", added); // dodawanie
+            if (added) {
+                console.log("Adding:", added);
                 const docRef = await addDoc(collection(db, "events"), added);
-                updatedData = [...data, { id: docRef.id, ...added }];
-            } catch (e) {
-                console.error("Błąd podczas dodawania dokumentu:", e);
+                updatedData.push({ id: docRef.id, ...added });
             }
-        }
 
-        if (changed) {   // edycja
-            updatedData = data.map(appointment => {
-                if (changed[appointment.id]) {
-                    const updatedAppointment = { ...appointment, ...changed[appointment.id] };
-                    const docRef = doc(db, "events", appointment.id);
-                    updateDoc(docRef, updatedAppointment).catch(error => console.error("Błąd podczas aktualizacji dokumentu:", error));
-                    return updatedAppointment;
-                }
-                return appointment;
-            });
-        }
+            if (changed) {
+                updatedData = updatedData.map(appointment => {
+                    if (changed[appointment.id]) {
+                        const updatedAppointment = { ...appointment, ...changed[appointment.id] };
+                        const docRef = doc(db, "events", appointment.id);
+                        updateDoc(docRef, updatedAppointment).catch(error => {
+                            console.error("Error updating document:", error);
+                            setError("Failed to update event. Please try again.");
+                        });
+                        return updatedAppointment;
+                    }
+                    return appointment;
+                });
+            }
 
-        if (deleted !== undefined) {  // usuwanie
-            try {
-                console.log("Usuwanie wydarzenia o ID:", deleted);  // usuwanie
+            if (deleted !== undefined) {
+                console.log("Deleting event with ID:", deleted);
                 const docRef = doc(db, "events", deleted);
                 await deleteDoc(docRef);
-                updatedData = data.filter(appointment => appointment.id !== deleted);
-            } catch (e) {
-                console.error("Błąd podczas usuwania dokumentu:", e);
+                updatedData = updatedData.filter(appointment => appointment.id !== deleted);
             }
-        }
 
-        console.log("Zaktualizowane dane:", updatedData);
-        setData(updatedData);
+            console.log("Updated data:", updatedData);
+            setData(updatedData);
+        } catch (e) {
+            console.error("Error committing changes:", e);
+            setError("Failed to save changes. Please try again.");
+        }
     };
+
+    if (loading) return <Paper><p>Loading calendar...</p></Paper>;
 
     return (
         <Paper>
+            {error && <Alert severity="error">{error}</Alert>}
             <LocalizationProvider dateAdapter={AdapterMoment}>
-                <Scheduler data={data} locale="pl-PL">
-                    <ViewState defaultCurrentDate={currentDate} />
+                <Scheduler data={data} locale="en-US">
+                    <ViewState defaultCurrentDate={getCurrentDate()} />
                     <EditingState onCommitChanges={commitChanges} />
                     <IntegratedEditing />
-                    <DayView startDayHour={9} endDayHour={14} />
-                    <WeekView startDayHour={9} endDayHour={14} />
+                    <DayView startDayHour={9} endDayHour={18} />
+                    <WeekView startDayHour={9} endDayHour={18} />
                     <MonthView />
                     <Toolbar />
                     <DateNavigator />
