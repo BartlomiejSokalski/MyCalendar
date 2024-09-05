@@ -3,8 +3,10 @@ import Paper from '@mui/material/Paper';
 import { db } from '../firebase/firebase';
 import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc, Timestamp } from "firebase/firestore";
 import { EditingState, ViewState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
+
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { LocalizationProvider } from '@mui/x-date-pickers';
+
 
 import {
     Scheduler,
