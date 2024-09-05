@@ -4,6 +4,8 @@ import { db } from '../firebase/firebase'; // Import Firebase Firestore
 import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { EditingState } from '@devexpress/dx-react-scheduler';
 import { IntegratedEditing } from '@devexpress/dx-react-scheduler';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 
 import {
     Scheduler,
@@ -90,20 +92,22 @@ export default function Calendar() {
 
     return (
         <Paper>
-            <Scheduler data={data} locale="pl-PL">
-                <ViewState defaultCurrentDate={currentDate} />
-                <EditingState onCommitChanges={commitChanges} />
-                <IntegratedEditing />
-                <DayView startDayHour={9} endDayHour={14} />
-                <WeekView startDayHour={9} endDayHour={14} />
-                <MonthView />
-                <Toolbar />
-                <DateNavigator />
-                <ViewSwitcher />
-                <Appointments />
-                <AppointmentTooltip showOpenButton showDeleteButton />
-                <AppointmentForm />
-            </Scheduler>
+            <LocalizationProvider dateAdapter={AdapterMoment}>
+                <Scheduler data={data} locale="pl-PL">
+                    <ViewState defaultCurrentDate={currentDate} />
+                    <EditingState onCommitChanges={commitChanges} />
+                    <IntegratedEditing />
+                    <DayView startDayHour={9} endDayHour={14} />
+                    <WeekView startDayHour={9} endDayHour={14} />
+                    <MonthView />
+                    <Toolbar />
+                    <DateNavigator />
+                    <ViewSwitcher />
+                    <Appointments />
+                    <AppointmentTooltip showOpenButton showDeleteButton />
+                    <AppointmentForm />
+                </Scheduler>
+            </LocalizationProvider>
         </Paper>
     );
 }
