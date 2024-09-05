@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Paper from '@mui/material/Paper';
-import { db } from '../firebase/firebase'; // Import Firebase Firestore
+import { db } from '../firebase/firebase';
 import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { EditingState } from '@devexpress/dx-react-scheduler';
 import { IntegratedEditing } from '@devexpress/dx-react-scheduler';
@@ -37,11 +37,11 @@ export default function Calendar() {
                     return {
                         id: doc.id,
                         ...eventData,
-                        startDate: eventData.startDate.toDate(),  // Konwersja Timestamp do Date
+                        startDate: eventData.startDate.toDate(),  // Timestamp do Date
                         endDate: eventData.endDate.toDate(),
                     };
                 });
-                console.log("Wydarzenia pobrane z Firestore:", events); // debugowanie
+                console.log("Wydarzenia pobrane z Firestore:", events);
                 setData(events);
             } catch (e) {
                 console.error("Błąd podczas pobierania wydarzeń:", e);
@@ -55,7 +55,7 @@ export default function Calendar() {
 
         if (added) {
             try {
-                console.log("Dodawanie:", added); // debugowanie
+                console.log("Dodawanie:", added); // dodawanie
                 const docRef = await addDoc(collection(db, "events"), added);
                 updatedData = [...data, { id: docRef.id, ...added }];
             } catch (e) {
@@ -63,21 +63,21 @@ export default function Calendar() {
             }
         }
 
-        if (changed) {
+        if (changed) {   // edycja
             updatedData = data.map(appointment => {
                 if (changed[appointment.id]) {
                     const updatedAppointment = { ...appointment, ...changed[appointment.id] };
                     const docRef = doc(db, "events", appointment.id);
-                    updateDoc(docRef, updatedAppointment).catch(error => console.error("Błąd podczas aktualizacji dokumentu:", error));  // debugowanie
+                    updateDoc(docRef, updatedAppointment).catch(error => console.error("Błąd podczas aktualizacji dokumentu:", error));
                     return updatedAppointment;
                 }
                 return appointment;
             });
         }
 
-        if (deleted !== undefined) {
+        if (deleted !== undefined) {  // usuwanie
             try {
-                console.log("Usuwanie wydarzenia o ID:", deleted); //debugowanie
+                console.log("Usuwanie wydarzenia o ID:", deleted);  // usuwanie
                 const docRef = doc(db, "events", deleted);
                 await deleteDoc(docRef);
                 updatedData = data.filter(appointment => appointment.id !== deleted);
@@ -86,7 +86,7 @@ export default function Calendar() {
             }
         }
 
-        console.log("Zaktualizowane dane:", updatedData); //debugowanie
+        console.log("Zaktualizowane dane:", updatedData);
         setData(updatedData);
     };
 
