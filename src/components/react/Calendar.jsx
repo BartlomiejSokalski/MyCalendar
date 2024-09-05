@@ -31,7 +31,7 @@ export default function Calendar() {
 
     const fetchEvents = React.useCallback(async () => {
         try {
-            setLoading(true);
+            setLoading(true)
             setError(null);
             console.log("Fetching events from Firestore...");
             const querySnapshot = await getDocs(collection(db, "events"));
