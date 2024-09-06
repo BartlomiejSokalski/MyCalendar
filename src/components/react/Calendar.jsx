@@ -3,10 +3,10 @@ import Paper from '@mui/material/Paper';
 import { db } from '../firebase/firebase';
 import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc, Timestamp } from "firebase/firestore";
 import { EditingState, ViewState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
-
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-
+import moment from 'moment'; // Importowanie moment.js
+import 'moment-timezone';    // Jeśli używasz moment-timezone, zaimportuj również to.
 
 import {
     Scheduler,
@@ -31,9 +31,8 @@ export default function Calendar() {
 
     const fetchEvents = React.useCallback(async () => {
         try {
-            setLoading(true)
+            setLoading(true);
             setError(null);
-            console.log("Fetching events from Firestore...");
             const querySnapshot = await getDocs(collection(db, "events"));
             const events = querySnapshot.docs.map(doc => {
                 const eventData = doc.data();
@@ -44,10 +43,8 @@ export default function Calendar() {
                     endDate: eventData.endDate instanceof Timestamp ? eventData.endDate.toDate() : new Date(eventData.endDate),
                 };
             });
-            console.log("Events fetched from Firestore:", events);
             setData(events);
         } catch (e) {
-            console.error("Error fetching events:", e);
             setError("Failed to load events. Please try again later.");
         } finally {
             setLoading(false);
@@ -63,7 +60,6 @@ export default function Calendar() {
             let updatedData = [...data];
 
             if (added) {
-                console.log("Adding:", added);
                 const docRef = await addDoc(collection(db, "events"), added);
                 updatedData.push({ id: docRef.id, ...added });
             }
@@ -73,10 +69,7 @@ export default function Calendar() {
                     if (changed[appointment.id]) {
                         const updatedAppointment = { ...appointment, ...changed[appointment.id] };
                         const docRef = doc(db, "events", appointment.id);
-                        updateDoc(docRef, updatedAppointment).catch(error => {
-                            console.error("Error updating document:", error);
-                            setError("Failed to update event. Please try again.");
-                        });
+                        updateDoc(docRef, updatedAppointment);
                         return updatedAppointment;
                     }
                     return appointment;
@@ -84,16 +77,13 @@ export default function Calendar() {
             }
 
             if (deleted !== undefined) {
-                console.log("Deleting event with ID:", deleted);
                 const docRef = doc(db, "events", deleted);
                 await deleteDoc(docRef);
                 updatedData = updatedData.filter(appointment => appointment.id !== deleted);
             }
 
-            console.log("Updated data:", updatedData);
             setData(updatedData);
         } catch (e) {
-            console.error("Error committing changes:", e);
             setError("Failed to save changes. Please try again.");
         }
     };
