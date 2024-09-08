@@ -1,22 +1,44 @@
-Projekt nie działa :/ 
+Kalendarz React z Firebase
+Opis projektu
+Jest to aplikacja kalendarza stworzona w React z integracją Firebase Firestore do przechowywania wydarzeń. Aplikacja pozwala na:
 
-według mnie wynika to z problemów z paczką @mui i kompatybilnością wersji.
-Spróbowałem wrzucać to przez inne darmowe hostingi lecz również bez powodzenia. 
-z tego co przeczytałem na forach problemm ten był i dalej nie jest naprawiony.
+Przeglądanie kalendarza w widoku dziennym, tygodniowym i miesięcznym.
+Dodawanie, edytowanie i usuwanie wydarzeń.
+Synchronizację danych z Firebase Firestore.
+Technologie
+React
+Firebase Firestore
+@devexpress/dx-react-scheduler
+Moment.js
+Material-UI (MUI)
+Instalacja
+Sklonuj repozytorium:
 
-Na stronie działa: 
--Zmiana widoku kalendarza,
--Usuwanie wydarzenia, 
--Szybki podgląd wydarzenia, 
--Poprawnie odczytuje dodane dane z bazy danych, 
+bash
+Skopiuj kod
+git clone https://github.com/bartlomiejSokalski/MyCalendar.git
+Zainstaluj zależności:
 
-Na stronie nie działa: 
--Edycja wydarzenia,
--Dodawanie wydarzenia,
+bash
+Skopiuj kod
+npm install
+Uruchom aplikację:
 
+bash
+Skopiuj kod
+npm start
+Konfiguracja Firebase
+Aby uruchomić aplikację z własną bazą danych Firebase, wykonaj następujące kroki:
 
-Niestety ale po około łącznie 14 godzinach walki z tylko tym jednym problemem z czystym sumieniem przyznaje że nie potrafie poradzić sobie sam z problemem i potrzebuję poprośić o pomoc kogoś kto wie więcej odemnie.
-
-Niestety również nie mam takiej osoby do której mógłbym się zwrócić także oddaje ten projekt nie skończony i nie działający. 
+Utwórz projekt w Firebase.
+Skonfiguruj Firebase Firestore w projekcie.
+Skopiuj swój konfigurację Firebase do pliku firebase.js.
+Funkcjonalności
+Dynamiczne dodawanie wydarzeń do kalendarza.
+Edycja istniejących wydarzeń.
+Usuwanie wydarzeń.
+Zmiana widoku na dzienny, tygodniowy lub miesięczny.
+Autor
+Projekt stworzony przez Bartłomiej Sokalski.
 
 
